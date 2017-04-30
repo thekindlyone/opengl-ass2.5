@@ -25,6 +25,11 @@ public class ColorPalette {
 	public static float[] Teal = { 0.000f, 0.502f, 0.502f };
 	public static float[] Navy = { 0.000f, 0.000f, 0.502f };
 	public static float[] floor = { 0.3f, 0.12f, 0.08f};
+	
+	public static float[]white1 = {245/255f,255/255f,250/255f};
+	public static float[]white2 = {240/255f,255/255f,255/255f};
+	public static float[]white3 = {255/255f,250/255f,240/255f};
+	
 
 
 

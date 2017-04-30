@@ -11,6 +11,7 @@ public class Grid {
 	private int displayList = -1;
 	private boolean isWireframe = true;
 	private double tmin, tmax;
+	private double worldsize = 100;
 
 	public Grid(double y, double size, float[] color, double tmin, double tmax) {
 		this.y = y;
@@ -37,8 +38,8 @@ public class Grid {
 		for (double z = 0; z <= imax; z += size / 2) {
 			for (double x = 0; x <= imax; x += size / 2) {
 
-				double scaledx = Misc.scale(x, 0, imax, -100, 100);
-				double scaledz = Misc.scale(z, 0, imax, -100, 100);
+				double scaledx = Misc.scale(x, 0, imax, -worldsize/2, worldsize/2);
+				double scaledz = Misc.scale(z, 0, imax, -worldsize/2, worldsize/2);
 
 				drawCell(gl, scaledx, y, scaledz, size, isWireframe);
 
