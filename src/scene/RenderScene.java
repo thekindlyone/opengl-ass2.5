@@ -70,6 +70,12 @@ public class RenderScene implements GLEventListener, KeyListener {
 
 		GL2 gl = drawable.getGL().getGL2();
 		GLUT glut = new GLUT();
+		
+		while (this.handleNextKeyEvent(gl))
+			;
+
+		while (this.handleNextKeyReleaseEvent(gl))
+			;
 
 		// clear the depth and color buffers
 		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
@@ -84,11 +90,7 @@ public class RenderScene implements GLEventListener, KeyListener {
 		// set up lights
 		this.lights(gl);
 
-		while (this.handleNextKeyEvent(gl))
-			;
 
-		while (this.handleNextKeyReleaseEvent(gl))
-			;
 
 		if (showOrigin) {
 			Origin.drawAxes(gl);
@@ -303,7 +305,6 @@ public class RenderScene implements GLEventListener, KeyListener {
 			break;
 		}
 		case KeyEvent.VK_W: {
-			// System.out.println("W PRESSED");
 			submarine.speed = -0.005;
 			break;
 		}

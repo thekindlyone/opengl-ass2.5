@@ -22,7 +22,6 @@ public class Submarine extends TreeNode {
 	};
 
 	public Yaw yaw;
-	// public enum Direction{FORWARD,REVERSE}
 
 	public double speed = 0;
 
@@ -30,7 +29,6 @@ public class Submarine extends TreeNode {
 
 	public double angle = 0;
 
-	// private double depth = 0;
 	private double sealevel;
 
 	public Submarine(double sealevel) {
@@ -110,6 +108,7 @@ public class Submarine extends TreeNode {
 		// y=depth;
 		if (this.y + distance > 0 && this.y + distance < sealevel) {
 			this.y += distance;
+			posy = y;
 
 		}
 	}
