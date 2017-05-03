@@ -1,14 +1,11 @@
 package utils;
 
-
-
 /**
- * @author Aritra Das
- *Class for storing known colors
+ * @author Aritra Das Class for storing known colors
  */
 public class ColorPalette {
 	public static float[] Black = { 0.000f, 0.000f, 0.000f };
-	public static float[] White = { 1.000f, 1.000f, 1.000f};
+	public static float[] White = { 1.000f, 1.000f, 1.000f };
 	public static float[] Red = { 1.000f, 0.000f, 0.000f };
 	public static float[] Lime = { 0.000f, 1.000f, 0.000f };
 	public static float[] Blue = { 0.000f, 0.000f, 1.000f };
@@ -24,18 +21,19 @@ public class ColorPalette {
 	public static float[] Purple = { 0.502f, 0.000f, 0.502f };
 	public static float[] Teal = { 0.000f, 0.502f, 0.502f };
 	public static float[] Navy = { 0.000f, 0.000f, 0.502f };
-	public static float[] floor = { 0.3f, 0.12f, 0.08f};
-	
-	public static float[]white1 = {245/255f,255/255f,250/255f};
-	public static float[]white2 = {240/255f,255/255f,255/255f};
-	public static float[]white3 = {255/255f,250/255f,240/255f};
-	
+	public static float[] floor = { 0.3f, 0.12f, 0.08f };
 
+	public static float[] white1 = { 245 / 255f, 255 / 255f, 250 / 255f };
+	public static float[] white2 = { 240 / 255f, 255 / 255f, 255 / 255f };
+	public static float[] white3 = { 255 / 255f, 250 / 255f, 240 / 255f };
 
-
-	/**takes alpha and color and returns color with alpha
-	 * @param color double[3] color
-	 * @param alpha transparency
+	/**
+	 * takes alpha and color and returns color with alpha
+	 * 
+	 * @param color
+	 *            double[3] color
+	 * @param alpha
+	 *            transparency
 	 * @return double[4] color with transparency
 	 */
 	public static float[] withalpha(float[] color, float alpha) {
@@ -49,4 +47,3 @@ public class ColorPalette {
 	}
 
 }
-

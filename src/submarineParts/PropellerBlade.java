@@ -1,16 +1,17 @@
 package submarineParts;
 
 import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.glu.GLU;
-import com.jogamp.opengl.glu.GLUquadric;
 import com.jogamp.opengl.util.gl2.GLUT;
 
 import utils.*;
 
+/**Class to create and draw Propeller Blades
+ * @author Aritra Das
+ *
+ */
 public class PropellerBlade extends TreeNode {
 
 	private int displayList = -1;
-	boolean isWireframe = true;
 	private double x, y, z;
 	double bladelength = 1.6;
 	double bladewidth = 0.5;
@@ -18,12 +19,18 @@ public class PropellerBlade extends TreeNode {
 	double subheight;
 	int bladeno;
 
+	/** Constructor for Propeller Blades
+	 * @param bladeno The index number of blade
+	 * @param subheight height of submarine
+	 */
 	public PropellerBlade(int bladeno, double subheight) {
 		this.bladeno = bladeno;
 		this.subheight = subheight;
 	}
-
-	private void initialiseDisplayList(GL2 gl, boolean isWireframe) {
+	/**Create and store displaylist
+	 * @param gl opengl drawable
+	 */
+	private void initialiseDisplayList(GL2 gl) {
 		GLUT glut = new GLUT();
 		// create the display list
 		displayList = gl.glGenLists(1);
@@ -39,19 +46,11 @@ public class PropellerBlade extends TreeNode {
 		gl.glPushMatrix();
 		gl.glRotated(180, 1, 0, 0);
 		gl.glTranslated(0, 0, -bladelength);
-		if (isWireframe) {
-			glut.glutWireCone(bladewidth, bladelength, 20, 20);
-		} else {
-			glut.glutSolidCone(bladewidth, bladelength, 20, 20);
-		}
+		glut.glutSolidCone(bladewidth, bladelength, 20, 20);
 		gl.glPopMatrix();
 		gl.glPushMatrix();
 		gl.glTranslated(0, 0, bladelength);
-		if (isWireframe) {
-			glut.glutWireSphere(bladewidth, 20, 20);
-		} else {
-			glut.glutSolidSphere(bladewidth, 20, 20);
-		}
+		glut.glutSolidSphere(bladewidth, 20, 20);
 		gl.glPopMatrix();
 
 		gl.glPopMatrix();
@@ -59,6 +58,9 @@ public class PropellerBlade extends TreeNode {
 		gl.glEndList();
 	}
 
+	/* (non-Javadoc)
+	 * @see utils.TreeNode#transformNode(com.jogamp.opengl.GL2)
+	 */
 	@Override
 	public void transformNode(GL2 gl) {
 		// System.out.println("transformnode called");
@@ -66,20 +68,26 @@ public class PropellerBlade extends TreeNode {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see utils.TreeNode#drawNode(com.jogamp.opengl.GL2)
+	 */
 	@Override
-	public void drawNode(GL2 gl, boolean isWireframe) {
+	public void drawNode(GL2 gl) {
 		// System.out.println("drawNode called");
-		if (displayList < 0 || isWireframe != this.isWireframe) {
+		if (displayList < 0) {
 			// if not initialised, do it now
-			initialiseDisplayList(gl, isWireframe);
+			initialiseDisplayList(gl);
 		}
-		this.isWireframe = isWireframe;
 		gl.glPushMatrix();
 		gl.glCallList(displayList);
 		gl.glPopMatrix();
 
 	}
-
+	/**Sets translation
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @param z the z coordinate
+	 */
 	public void setTranslation(double x, double y, double z) {
 		this.x = x;
 		this.y = y;

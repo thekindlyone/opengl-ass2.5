@@ -1,6 +1,5 @@
 package scene;
 
-
 import java.awt.Frame;
 
 import java.awt.event.WindowAdapter;
@@ -13,7 +12,6 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.FPSAnimator;
-import com.jogamp.opengl.util.gl2.GLUT;
 
 import components.*;
 import utils.*;
@@ -24,7 +22,6 @@ public class RenderScene implements GLEventListener, KeyListener {
 	private TrackballCamera camera2;
 	private FollowCamera camera3;
 	private static GLCanvas canvas;
-	private boolean track = true;
 	Grid seabed, watersurface;
 	Submarine submarine;
 	private LinkedBlockingQueue<KeyEvent> eventQ = new LinkedBlockingQueue<KeyEvent>();
@@ -36,16 +33,20 @@ public class RenderScene implements GLEventListener, KeyListener {
 	private double divespeed = 0.01;
 
 	double sealevel = 3;
+	double bedlevel = 0;
 
 	private enum CameraMode {
 		CUSTOM, FOLLOW, PLAIN;
 		public CameraMode getNext() {
 			return values()[(ordinal() + 1) % values().length];
-			}
+		}
 	}
 
 	CameraMode camMode = CameraMode.FOLLOW;
 
+	/**Draws the Camera based on camera mode set. Also resets Submarine Position in case its the Plain Camera
+	 * @param gl GL2.gl drawable object
+	 */
 	public void drawcamera(GL2 gl) {
 		switch (camMode) {
 		case PLAIN: {
@@ -58,7 +59,7 @@ public class RenderScene implements GLEventListener, KeyListener {
 			break;
 		}
 		case FOLLOW: {
-			camera3.draw(gl, submarine.angle, submarine.posx, submarine.y,submarine.posz);
+			camera3.draw(gl, submarine);
 			break;
 		}
 		}
@@ -69,8 +70,8 @@ public class RenderScene implements GLEventListener, KeyListener {
 	public void display(GLAutoDrawable drawable) {
 
 		GL2 gl = drawable.getGL().getGL2();
-		GLUT glut = new GLUT();
-		
+
+		// handle keypresses
 		while (this.handleNextKeyEvent(gl))
 			;
 
@@ -80,25 +81,20 @@ public class RenderScene implements GLEventListener, KeyListener {
 		// clear the depth and color buffers
 		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
-		// using default camera & projection
-		// if (!track) {
-		// camera.draw(gl);
-		// } else {
-		// camera2.draw(gl);
-		// }
 		drawcamera(gl);
+
 		// set up lights
 		this.lights(gl);
 
+		setDrawMode(gl);
 
-
+		seabed.draw(gl);
+		watersurface.draw(gl);
 		if (showOrigin) {
 			Origin.drawAxes(gl);
 		}
 
-		seabed.draw(gl, isWireframe);
-		watersurface.draw(gl, isWireframe);
-		submarine.draw(gl, isWireframe);
+		submarine.draw(gl);
 
 		gl.glFlush();
 
@@ -128,12 +124,15 @@ public class RenderScene implements GLEventListener, KeyListener {
 
 		camera3 = new FollowCamera(canvas);
 
-		// double y, double size, float[] color, double tmin, double tmax
-		seabed = new Grid(0, 3, ColorPalette.withalpha(ColorPalette.floor, 1), -100, 100);
+		seabed = new Grid(bedlevel, 3, ColorPalette.withalpha(ColorPalette.floor, 1), -100, 100);
 		watersurface = new Grid(sealevel, 3, ColorPalette.withalpha(ColorPalette.Blue, 0.1f), -100, 100);
-		submarine = new Submarine(sealevel);
-		submarine.setTranslation(0, 0.28, 0);
-		// submarine.axle.start(3, true);
+		submarine = new Submarine(sealevel, bedlevel);
+		submarine.dive(0.28);
+
+		System.out.println("Key Mapping:\n--------------------------\n"
+				+ "Up/Down Arrows : Increase depth(dive) or decrease depth (surface)\n"
+				+ "W/S: Move forward or backward\nA/D: Yaw(turn left or right)\n"
+				+ "O: Show/Hide Origin and Axes\nL: Toggle Filled/Wireframe\nC: Toggle Camera Mode");
 
 	}
 
@@ -164,7 +163,6 @@ public class RenderScene implements GLEventListener, KeyListener {
 
 		// Set the viewport to cover the new window
 		gl.glViewport(0, 0, width, height);
-//		camera.newWindowSize(width, height);
 		camera2.newWindowSize(width, height);
 		camera3.newWindowSize(width, height);
 
@@ -228,20 +226,19 @@ public class RenderScene implements GLEventListener, KeyListener {
 			// event.
 		}
 
-		// if(e.getKeyCode() == KeyEvent.VK_A || e.getKeyCode() ==
-		// KeyEvent.VK_D){
-		// submarine.steer(Submarine.Yaw.CENTER);
-		// }
-
 	}
 
 	@Override
 	public void keyTyped(KeyEvent arg0) {
 		// TODO Auto-generated method stub
-		// if e
 
 	}
 
+	/**
+	 * Handles Keystrokes Queue
+	 * @param gl
+	 * @return true if there are events waiting in queue
+	 */
 	private boolean handleNextKeyEvent(GL2 gl) {
 		boolean eventsToHandle = false;
 
@@ -259,6 +256,11 @@ public class RenderScene implements GLEventListener, KeyListener {
 
 	}
 
+	/**
+	 * Handles Keystroke Release Queue
+	 * @param gl
+	 * @return true if there are events waiting in queue
+	 */
 	private boolean handleNextKeyReleaseEvent(GL2 gl) {
 		boolean eventsToHandle = false;
 
@@ -276,11 +278,15 @@ public class RenderScene implements GLEventListener, KeyListener {
 
 	}
 
+	/**
+	 * handles key press action
+	 * @param e Keyevent triggered
+	 * @param gl
+	 */
 	private void handleKeyEvent(KeyEvent e, GL2 gl) {
 		int key = e.getKeyCode();
 		switch (key) {
 		case KeyEvent.VK_L: {
-			// System.out.println("detected");
 			isWireframe = !isWireframe;
 			break;
 		}
@@ -314,13 +320,18 @@ public class RenderScene implements GLEventListener, KeyListener {
 		}
 
 		case KeyEvent.VK_C: {
-			camMode=camMode.getNext();
+			camMode = camMode.getNext();
 			break;
 		}
 		}
 
 	}
-
+	
+	/**
+	 * handles key release action
+	 * @param e Keyevent triggered
+	 * @param gl Drawable gl object
+	 */
 	private void handleKeyReleaseEvent(KeyEvent e, GL2 gl) {
 
 		int key = e.getKeyCode();
@@ -335,7 +346,6 @@ public class RenderScene implements GLEventListener, KeyListener {
 		}
 
 		case KeyEvent.VK_W: {
-			// System.out.println("W RELEASED");
 			submarine.speed = 0;
 			break;
 		}
@@ -347,8 +357,13 @@ public class RenderScene implements GLEventListener, KeyListener {
 		}
 
 	}
-	
 
-	
+	/**
+	 * sets draw mode fill or wireframe
+	 * @param gl drawable gl object
+	 */
+	public void setDrawMode(GL2 gl) {
+		gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, (isWireframe) ? GL2.GL_LINE : GL2.GL_FILL);
+	}
 
 }
