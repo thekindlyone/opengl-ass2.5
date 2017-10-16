@@ -1,5 +1,11 @@
 package scene;
 
+/**
+ * Class for a simple camera that rotates around the point of view
+ * using mouse dragging.
+ *
+ * @author Jacqueline Whalley
+ */
 
 import java.awt.Point;
 import java.awt.event.MouseEvent;
@@ -13,11 +19,6 @@ import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.glu.GLU;
 
 
-
-/**Camera that can be controlled with mouse
- *@author Jacqueline Whalley
- *
- */
 public class TrackballCamera implements MouseListener, MouseMotionListener, MouseWheelListener {
 
     // some hard limitations to camera values
@@ -44,7 +45,6 @@ public class TrackballCamera implements MouseListener, MouseMotionListener, Mous
 
     // GLU context
     GLU glu = new GLU();
-    
 
     /**
      * Constructor of the trackball camera
@@ -209,8 +209,8 @@ public class TrackballCamera implements MouseListener, MouseMotionListener, Mous
                 // limit Y rotation angle to avoid gimbal lock
                 angleY = Math.min(89.9, Math.max(-89.9, angleY));
             } // dragging with right mouse button: change distance
-            else if (mouseButton == MouseEvent.BUTTON3 || mouseButton == MouseEvent.BUTTON2) {
-                distanceToOrigin +=( ( mouseButton == MouseEvent.BUTTON2)?0.1:-0.1 )* (p.y - oldMousePos.y);
+            else if (mouseButton == MouseEvent.BUTTON3) {
+                distanceToOrigin += 0.1 * (p.y - oldMousePos.y);
                 limitDistance();
             }
 
@@ -237,5 +237,5 @@ public class TrackballCamera implements MouseListener, MouseMotionListener, Mous
         limitFieldOfView();
     }
 
-  
+   
 }

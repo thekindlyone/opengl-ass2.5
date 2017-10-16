@@ -14,16 +14,20 @@ import submarineParts.*;
  */
 public class Submarine extends TreeNode {
 
-	double length = 0.7;
-	double width = 0.2;
-	double height = 0.2;
+	public double length = 0.4;
+	double width = 0.15;
+	double height = 0.15;
 	public double x = 0, y = 0, z = 0;
 	private Body body;
 	public PropellerAxle axle;
 	private PropellerBlade[] blades;
+	private Spotlight spotlight;
 	private Sail sail;
 	private Fin fin;
 	public double angularspeed = 2;
+	public double xangle = 0;
+	public double zangle = 0;
+	private int numplants;
 
 	public enum Yaw {
 		LEFT, RIGHT, CENTER
@@ -39,6 +43,18 @@ public class Submarine extends TreeNode {
 	public double angle = 0;
 
 	private double sealevel, bedlevel;
+	private static double roll = 10;
+	private static double pitch = 10;
+
+	// public boolean diving = false;
+	public enum DiveState {
+		UP, DOWN, NONE
+	};
+
+	public DiveState dstate = DiveState.NONE;
+	private MaterialProfile submaterial;
+	private Plant[] plants;
+	Point worldmax,worldmin;
 
 	/**
 	 * Constructor for submarine.
@@ -48,9 +64,14 @@ public class Submarine extends TreeNode {
 	 * @param bedlevel
 	 *            y coordinate indicating seabed
 	 */
-	public Submarine(double sealevel, double bedlevel) {
+	public Submarine(MaterialProfile submaterial, double sealevel, double bedlevel, Point worldmin,Point worldmax,int numplants, Plant[] plants) {
+		this.plants = plants;
+		this.numplants = numplants;
+		this.submaterial = submaterial;
 		this.sealevel = sealevel;
 		this.bedlevel = bedlevel;
+		this.worldmax=worldmax;
+		this.worldmin=worldmin;
 		this.body = new Body(length, height, width);
 		this.addChild(body);
 		this.axle = new PropellerAxle();
@@ -70,6 +91,9 @@ public class Submarine extends TreeNode {
 		fin.setTranslation(length * 0.80, 0, 0);
 		body.addChild(fin);
 
+		this.spotlight = new Spotlight(new float[] { -1.5f, 0, 0, 1 });
+		body.addChild(spotlight);
+
 	}
 
 	/*
@@ -83,6 +107,22 @@ public class Submarine extends TreeNode {
 		gl.glTranslated(x, y, z);
 		gl.glRotated(angle, 0, 1, 0);
 
+		switch (dstate) {
+		case NONE: {
+			break;
+		}
+		case UP: {
+			gl.glRotated(-pitch, 0, 0, 1);
+			break;
+		}
+		case DOWN: {
+			gl.glRotated(pitch, 0, 0, 1);
+			break;
+		}
+		}
+
+		gl.glRotated(xangle, 1, 0, 0);
+
 	}
 
 	/*
@@ -92,6 +132,8 @@ public class Submarine extends TreeNode {
 	 */
 	@Override
 	public void drawNode(GL2 gl) {
+		submaterial.apply(gl);
+		gl.glColor3fv(ColorPalette.White, 0);
 
 	}
 
@@ -106,6 +148,7 @@ public class Submarine extends TreeNode {
 	 *            the z coordinate
 	 */
 	public void setTranslation(double x, double y, double z) {
+
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -134,43 +177,52 @@ public class Submarine extends TreeNode {
 		case LEFT: {
 			fin.setRotation(25);
 			angle += angularspeed;
+			xangle = roll;
 			break;
 		}
 		case RIGHT: {
 			fin.setRotation(-25);
 			angle -= angularspeed;
+			xangle = -roll;
 			break;
 		}
 		case CENTER: {
 			fin.setRotation(0);
+			xangle = 0;
 			break;
 		}
 		}
 	}
 
-	/**Dives or Surfaces submarine
-	 * @param distance distance to dive
+	/**
+	 * Dives or Surfaces submarine
+	 * 
+	 * @param distance
+	 *            distance to dive
 	 */
 	public void dive(double distance) {
-		if (this.y + distance > bedlevel + height && this.y + distance < sealevel) {
+		if (this.y + distance > bedlevel + height && this.y + distance < sealevel
+				&& !check_collission(x, y + distance, z)) {
 			this.y += distance;
 			posy = y;
 
 		}
 	}
 
-	/**Propels submarine
+	/**
+	 * Propels submarine
 	 * 
 	 */
 	public void propel() {
 		if (speed != 0) {
 			double xtrans = speed * Math.cos(Math.toRadians(angle));
 			double ztrans = -speed * Math.sin(Math.toRadians(angle));
-
-			posx += xtrans;
-			posz += ztrans;
-			this.setTranslation(posx, posy, posz);
-			this.axle.rotate(speed);
+			if (!check_collission(posx + xtrans, posy, posz + ztrans) && Collission.check_inside(worldmax.x, new Point(posx + xtrans, posy, posz + ztrans), length/2, 0.02)) {
+				posx += xtrans;
+				posz += ztrans;
+				this.setTranslation(posx, posy, posz);
+				this.axle.rotate(speed);
+			}
 		}
 	}
 
@@ -179,7 +231,7 @@ public class Submarine extends TreeNode {
 	 */
 	public void reset() {
 		posx = 0;
-		posy = bedlevel + height + 0.065;
+		posy = 0;
 		x = 0;
 		y = posy;
 		z = 0;
@@ -187,6 +239,27 @@ public class Submarine extends TreeNode {
 		speed = 0;
 		angle = 0;
 
+	}
+
+	public void showpos() {
+		System.out.println("SUB POS: " + this.x + "," + this.y + "," + this.z);
+	}
+
+	public boolean check_collission(double x, double y, double z) {
+		for (int i = 0; i < numplants; i++) {
+			if (Collission.check(plants[i].bboxmin, // bounding box minimum
+					plants[i].bboxmax, // bounding box maximum
+					new Point(x, y, z), // center
+										// of
+										// sphere
+					this.length / 2, // radius of sphere
+					0.02 // tolerence
+			)) {
+				return true;
+
+			}
+		}
+		return false;
 	}
 
 }

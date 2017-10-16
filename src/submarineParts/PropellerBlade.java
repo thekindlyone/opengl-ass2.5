@@ -41,9 +41,13 @@ public class PropellerBlade extends TreeNode {
 
 		gl.glPushMatrix();
 		gl.glRotated((360 / 4) * bladeno, 1, 0, 0);
+		gl.glRotated(45, 0, 0, 1);
 		gl.glScaled(1, subheight / bladelength, subheight / bladelength);
 		gl.glScaled(bladethickness, 1, 1);
 		gl.glPushMatrix();
+		
+		
+
 		gl.glRotated(180, 1, 0, 0);
 		gl.glTranslated(0, 0, -bladelength);
 		glut.glutSolidCone(bladewidth, bladelength, 20, 20);

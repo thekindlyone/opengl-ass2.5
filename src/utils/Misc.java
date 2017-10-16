@@ -1,5 +1,7 @@
 package utils;
 
+import java.util.Random;
+
 /**Misc functions
  * @author Aritra Das
  *
@@ -18,5 +20,26 @@ public class Misc {
 		return targetMin + ( ((targetMax-targetMin)*(input-inputMin))/(inputMax-inputMin) );
 
 	}
+	
+	private static Random randomno = new Random();
+
+	/**Returns random value between a given range
+	 * @param min lower limit of range
+	 * @param max upper limit of range
+	 * @return random number such that min<random number<max 
+	 */
+	public static float get_rand(float min, float max) {
+
+		return ((max - min) * randomno.nextFloat() + min);
+
+	}
+	
+	public static double get_rand(double min, double max) {
+
+		return ((max - min) * randomno.nextFloat() + min);
+
+	}
+	
+	
 
 }

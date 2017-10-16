@@ -26,6 +26,11 @@ public class ColorPalette {
 	public static float[] white1 = { 245 / 255f, 255 / 255f, 250 / 255f };
 	public static float[] white2 = { 240 / 255f, 255 / 255f, 255 / 255f };
 	public static float[] white3 = { 255 / 255f, 250 / 255f, 240 / 255f };
+	public static float[] light1 = { 0.02f, 0.02f, 0.02f};
+	public static float[] Fog = { 0.000f, 0.000f, 0.400f };
+	public static float[] ambient = { 0.2f, 0.2f, 0.200f };
+	public static float[] Fog2={220f/255f, 240f/255f,247f/255f};
+	public static float[] Ocean = {0.01f, 0.12f, 0.29f};
 
 	/**
 	 * takes alpha and color and returns color with alpha
@@ -44,6 +49,14 @@ public class ColorPalette {
 		newcolor[3] = alpha;
 		return newcolor;
 
+	}
+	
+	public static float[] randomcolor(){
+		float r= Misc.get_rand(0f, 1f);
+		float g= Misc.get_rand(0f, 1f);
+		float b= Misc.get_rand(0f, 1f);
+		
+		return new float[]{r,g,b};
 	}
 
 }

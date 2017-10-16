@@ -13,18 +13,19 @@ public class FollowCamera {
 
 	// camera parameters
 	double fieldOfView = 45;
-	double distanceToSub = 5;
+	double distanceToSub = 4;
 	double windowWidth = 1;
 	double windowHeight = 1;
-	double elevation = 1.5;
+	double elevation = 20; // degrees
+	double lookat[] = { 0, 0, 0 };
 
-	double camX, camZ;
+	public double camX, camZ, camY;
 
 	// GLU context
 	GLU glu = new GLU();
 
 	/**
-	 * Constructor of the trackball camera
+	 * Constructor of the Follow camera
 	 * 
 	 * @param drawable
 	 *            the GL drawable context to register this camera with
@@ -45,10 +46,8 @@ public class FollowCamera {
 		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glLoadIdentity();
 		// setting up perspective projection
-		// far distance is hardcoded to 3*cameraDistance. If your scene is
-		// bigger,
-		// you might need to adapt this
-		glu.gluPerspective(fieldOfView, windowWidth / windowHeight, 0.1, 15);
+
+		glu.gluPerspective(fieldOfView, windowWidth / windowHeight, 0.1, 20);
 
 		// then set up the camera position and orientation
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
@@ -57,9 +56,12 @@ public class FollowCamera {
 		angle = submarine.angle + 90;
 		camZ = submarine.posz + distanceToSub * Math.cos(Math.toRadians(angle));
 		camX = submarine.posx + distanceToSub * Math.sin(Math.toRadians(angle));
-		glu.gluLookAt(camX, submarine.posy + elevation, camZ, // eye
-				submarine.posx, submarine.posy + (elevation / 2), submarine.posz, // look
-																					// at
+		camY = submarine.posy + distanceToSub * Math.cos(Math.toRadians(90 - elevation));
+		lookat[0] = submarine.posx + submarine.length * Math.sin(Math.toRadians(angle));
+		lookat[2] = submarine.posz + submarine.length * Math.cos(Math.toRadians(angle));
+		lookat[1] = submarine.posy;
+		glu.gluLookAt(camX, camY, camZ, // eye
+				lookat[0], lookat[1], lookat[2], // look at
 				0, 1, 0); // up
 	}
 
@@ -75,6 +77,11 @@ public class FollowCamera {
 	public void newWindowSize(int width, int height) {
 		windowWidth = Math.max(1.0, width);
 		windowHeight = Math.max(1.0, height);
+	}
+	
+	
+	public float[] getpos(){
+		return new float[]{(float)this.camX,(float)this.camY,(float)this.camZ,0};
 	}
 
 }

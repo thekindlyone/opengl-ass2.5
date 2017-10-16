@@ -19,6 +19,7 @@ public class Origin {
 	 *            opengl drawable
 	 */
 	public static void drawAxes(GL2 gl) {
+		gl.glEnable(GL2.GL_COLOR_MATERIAL);
 		GLUT glut = new GLUT();
 		// axes
 		gl.glDisable(GL2.GL_DEPTH_TEST);
@@ -38,6 +39,7 @@ public class Origin {
 		gl.glColor3d(0, 1, 0);
 		glut.glutSolidSphere(0.02f, 50, 50);
 		gl.glEnable(GL2.GL_DEPTH_TEST);
+		gl.glDisable(GL2.GL_COLOR_MATERIAL);
 	}
 
 }
